@@ -10,8 +10,21 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         clear = options.get('clear')
+        only_initial_upload = options.get('only_initial_upload')
         if clear:
             WiFiSpot.objects.all().delete()
+            self.stdout.write(self.style.SUCCESS('Все Wi-fi удалены'))
+            return
+        if only_initial_upload:
+            if len(WiFiSpot.objects.all()) != 0:
+                message = """
+                Ты запускаешь команду upload_data_to_db с флагом "--only_initial_upload", но бд не пуская. 
+                Либо убери флаг, либо почисти бд запустив команду с флагом '-с'.
+                Это сделано с целью защиты от дублирования начальных данных в бд.
+                Наверняка есть более интересное решение - надо подумать.
+                """
+                self.stdout.write(self.style.ERROR(message))
+                return
 
         wi_fi_spots = self.prepare_wi_fi_spots()
         try:
@@ -30,14 +43,17 @@ class Command(BaseCommand):
                     latitude_WGS84=spot['latitude_WGS84']
                 ) for spot in wi_fi_spots]
             )
+            self.stdout.write(self.style.SUCCESS('Wi-fi точки успешно загружены!'))
         except Exception as ex:
-            print(ex)
-        self.stdout.write(self.style.SUCCESS('Wi-fi точки успешно загружены>'))
+            self.stdout.write(self.style.ERROR(f'Тут какая-то ситуация: {ex}'))
 
     def add_arguments(self, parser):
         parser.add_argument(
           '-c', '--clear', action='store_const', const=True,
           help="Удаляет все записи о wi-fi точках и загрузить новые")
+        parser.add_argument(
+          '-oiu', '--only_initial_upload', action='store_const', const=True,
+          help="Загрузит данные из датасета только на пустую базу")
 
     @staticmethod
     def prepare_wi_fi_spots():

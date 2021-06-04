@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -59,9 +60,13 @@ TEMPLATES = [
 WSGI_APPLICATION = 'core.wsgi.application'
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+    "default": {
+        "ENGINE": os.getenv("DJANGO_DB_ENGINE", 'django.db.backends.sqlite3'),
+        "NAME": os.getenv("DJANGO_DB_DATABASE", os.path.join(BASE_DIR, 'db.sqlite3')),
+        "USER": os.getenv("DJANGO_DB_USER"),
+        "PASSWORD": os.getenv("DJANGO_DB_PASSWORD"),
+        "HOST": os.getenv("DJANGO_DB_HOST"),
+        "PORT": os.getenv("DJANGO_DB_PORT"),
     }
 }
 
@@ -91,5 +96,6 @@ USE_L10N = True
 USE_TZ = True
 
 STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

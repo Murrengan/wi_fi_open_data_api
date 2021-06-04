@@ -1,5 +1,3 @@
-from rest_framework.filters import SearchFilter
-from rest_framework.generics import ListAPIView
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.viewsets import ModelViewSet
 
