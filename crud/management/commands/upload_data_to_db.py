@@ -6,16 +6,18 @@ from crud.models import WiFiSpot
 
 
 class Command(BaseCommand):
-    help = 'Загрузить данные в базу данных'
+    help = 'Загрузит данные из wifi_dataset.json в базу данных'
 
     def handle(self, *args, **options):
         clear = options.get('clear')
         only_initial_upload = options.get('only_initial_upload')
         if clear:
+            'Полномтью очистит wi-fi spots из бд'
             WiFiSpot.objects.all().delete()
             self.stdout.write(self.style.SUCCESS('Все Wi-fi удалены'))
             return
         if only_initial_upload:
+            'Позволит загрузить wifi_dataset.json только в пустую бд'
             if len(WiFiSpot.objects.all()) != 0:
                 message = """
                 Ты запускаешь команду upload_data_to_db с флагом "--only_initial_upload", но бд не пуская. 
@@ -57,6 +59,7 @@ class Command(BaseCommand):
 
     @staticmethod
     def prepare_wi_fi_spots():
+        # в зависимости от потребностей бизнеса, мы может прописывать дефолтное значние и уже его писать в бд
         wi_fi_spots = []
         with open('wifi_dataset.json', 'r', encoding='utf-8') as f:
             data = json.load(f)
@@ -70,7 +73,7 @@ class Command(BaseCommand):
                         'coverage_area': int(i.get('CoverageArea', '')),
                         'function_flag': i.get('FunctionFlag', ''),
                         'access_flag': i.get('AccessFlag', ''),
-                        'longitude_WGS84': float(i.get('Longitude_WGS84', 0)),
-                        'latitude_WGS84': float(i.get('Latitude_WGS84', 0))}
+                        'longitude_WGS84': float(i.get('Longitude_WGS84', 0.0)),
+                        'latitude_WGS84': float(i.get('Latitude_WGS84', 0.0))}
                 wi_fi_spots.append(spot)
         return wi_fi_spots
